@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vehicle Management</title>
+</head>
+
+<body>
+
+    <h1>Vehicle Management</h1>
+
+    <!-- Lista di tutti i veicoli -->
+    <h2>All Vehicles</h2>
+    <ul id="vehicleList"></ul>
+
+    <!-- Ricerca veicolo per targa -->
+    <h2>Find Vehicle by Plate</h2>
+    <input type="text" id="searchTarga" placeholder="Enter plate (e.g., AB123CD)">
+    <button onclick="searchVehicle()">Search</button>
+    <p id="vehicleResult"></p>
+
+    <!-- Conteggio veicoli per stato -->
+    <h2>Vehicles Count by Status</h2>
+    <ul id="vehicleCount"></ul>
+
+    <!-- Modifica stato veicolo -->
+    <h2>Update Vehicle Status</h2>
+    <input type="text" id="updateId" placeholder="Vehicle ID">
+    <select id="newStatus">
+        <option value="IN_ATTESA">In Attesa</option>
+        <option value="IN_LAVORAZIONE">In Lavorazione</option>
+        <option value="COMPLETATO">Completato</option>
+    </select>
+    <button onclick="updateVehicleStatus()">Update Status</button>
+    <p id="updateResult"></p>
+
+    <!-- Elimina veicolo -->
+    <h2>Delete Vehicle</h2>
+    <input type="text" id="deleteTarga" placeholder="Enter plate (e.g., AB123CD)">
+    <button onclick="deleteVehicle()">Delete</button>
+    <p id="deleteResult"></p>
+
+    <!-- Aggiungi nuovo veicolo -->
+    <h2>Add New Vehicle</h2>
+    <form id="addVehicleForm">
+        <input type="text" id="newMarca" placeholder="Marca" required>
+        <input type="text" id="newModello" placeholder="Modello" required>
+        <input type="text" id="newTarga" placeholder="Targa" required>
+        <select id="newStatusAdd">
+            <option value="IN_ATTESA">In Attesa</option>
+            <option value="IN_LAVORAZIONE">In Lavorazione</option>
+            <option value="COMPLETATO">Completato</option>
+        </select>
+        <button type="button" onclick="addVehicle()">Add Vehicle</button>
+    </form>
+    <p id="addResult"></p>
+
+    <script>
+        // Fetch all vehicles
+        function getAllVehicles() {
+            fetch("http://localhost:8080/api/vehicles")
+                .then(response => response.json())
+                .then(vehicles => {
+                    const vehicleList = document.getElementById("vehicleList");
+                    vehicleList.innerHTML = "";
+                    vehicles.forEach(vehicle => {
+                        const listItem = document.createElement("li");
+                        listItem.textContent = `${vehicle.id} - ${vehicle.marca} ${vehicle.modello} - ${vehicle.targa} (${vehicle.stato})`;
+                        vehicleList.appendChild(listItem);
+                    });
+                })
+                .catch(error => console.error("Error fetching vehicles:", error));
+        }
+
+        // Search vehicle by plate
+        function searchVehicle() {
+            const targa = document.getElementById("searchTarga").value.toUpperCase();
+            fetch(`http://localhost:8080/api/vehicles/${targa}`)
+                .then(response => {
+                    if (!response.ok) throw new Error("Vehicle not found");
+                    return response.json();
+                })
+                .then(vehicle => {
+                    document.getElementById("vehicleResult").textContent =
+                        `${vehicle.marca} ${vehicle.modello} - ${vehicle.targa} (${vehicle.stato})`;
+                })
+                .catch(() => document.getElementById("vehicleResult").textContent = "Vehicle not found");
+        }
+
+        // Fetch vehicle count by status
+        function getVehicleCount() {
+            fetch("http://localhost:8080/api/vehicles/count-by-status")
+                .then(response => response.json())
+                .then(counts => {
+                    const vehicleCount = document.getElementById("vehicleCount");
+                    vehicleCount.innerHTML = "";
+                    for (const [status, count] of Object.entries(counts)) {
+                        const listItem = document.createElement("li");
+                        listItem.textContent = `${status}: ${count}`;
+                        vehicleCount.appendChild(listItem);
+                    }
+                })
+                .catch(error => console.error("Error fetching vehicle count:", error));
+        }
+
+        // Update vehicle status (PATCH)
+        function updateVehicleStatus() {
+            const id = document.getElementById("updateId").value;
+            const newStatus = document.getElementById("newStatus").value;
+
+            fetch(`http://localhost:8080/api/vehicles/${id}`, {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ stato: newStatus })
+            })
+                .then(response => {
+                    if (!response.ok) throw new Error("Failed to update vehicle");
+                    return response.json();
+                })
+                .then(vehicle => {
+                    document.getElementById("updateResult").textContent = `Updated: ${vehicle.marca} ${vehicle.modello} to ${vehicle.stato}`;
+                    getAllVehicles(); // Refresh list
+                })
+                .catch(() => document.getElementById("updateResult").textContent = "Error updating vehicle");
+        }
+
+
+        // Delete vehicle (DELETE)
+        function deleteVehicle() {
+            const targa = document.getElementById("deleteTarga").value.toUpperCase();
+            fetch(`http://localhost:8080/api/vehicles/${targa}`, { method: "DELETE" })
+                .then(response => {
+                    if (!response.ok) throw new Error("Failed to delete vehicle");
+                    document.getElementById("deleteResult").textContent = "Vehicle deleted successfully";
+                    getAllVehicles(); // Refresh list
+                })
+                .catch(() => document.getElementById("deleteResult").textContent = "Error deleting vehicle");
+        }
+
+        // Add new vehicle (POST) with auto-generated ID
+        function addVehicle() {
+            const marca = document.getElementById("newMarca").value;
+            const modello = document.getElementById("newModello").value;
+            const targa = document.getElementById("newTarga").value;
+            const stato = document.getElementById("newStatusAdd").value;
+
+            // Fetch all vehicles to determine the next available ID
+            fetch("http://localhost:8080/api/vehicles")
+                .then(response => response.json())
+                .then(vehicles => {
+                    // Find the maximum ID from the list of vehicles
+                    const maxId = Math.max(...vehicles.map(vehicle => vehicle.id), 0);
+
+                    // Set the new ID to the next available ID (maxId + 1)
+                    const newId = maxId + 1;
+
+                    const newVehicle = {
+                        id: newId,  // Assign the new ID
+                        marca: marca,
+                        modello: modello,
+                        targa: targa,
+                        stato: stato
+                    };
+
+                    // Send the new vehicle to the server
+                    fetch("http://localhost:8080/api/vehicles", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(newVehicle)
+                    })
+                        .then(response => {
+                            if (!response.ok) throw new Error("Failed to add vehicle");
+                            return response.json();
+                        })
+                        .then(vehicle => {
+                            document.getElementById("addResult").textContent = `Added: ${vehicle.marca} ${vehicle.modello} - ${vehicle.targa}`;
+                            getAllVehicles(); // Refresh the list of vehicles
+                        })
+                        .catch(() => document.getElementById("addResult").textContent = "Error adding vehicle");
+                })
+                .catch(() => document.getElementById("addResult").textContent = "Error fetching vehicles");
+        }
+
+
+        // Load vehicles and counts on page load
+        getAllVehicles();
+        getVehicleCount();
+    </script>
+
+</body>
+
+</html>

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Users List</title>
+</head>
+
+<body>
+
+    <h2>Users</h2>
+    <ul id="userList"></ul> <!-- The users will be displayed here -->
+
+    <script>
+        fetch("http://localhost:8080/api/users")
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error("Errore nella richiesta");
+                }
+                return response.json();
+            })
+            .then(users => {
+                console.log("Utenti ricevuti:", users);
+
+                // Get the <ul> element where users will be displayed
+                const userList = document.getElementById("userList");
+
+                // Loop through users and add them to the list
+                users.forEach(user => {
+                    const listItem = document.createElement("li");
+                    listItem.textContent = `${user.name} (${user.email})`;
+                    userList.appendChild(listItem);
+                });
+            })
+            .catch(error => console.error("Errore:", error));
+    </script>
+
+</body>
+
+</html>
