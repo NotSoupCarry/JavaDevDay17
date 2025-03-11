@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.userapi.models.User;
 import com.example.userapi.services.UserService;
 
+import java.net.URI;
 import java.util.List;
 import java.util.Optional;
 
@@ -43,10 +44,11 @@ public class UserController {
         return userService.findUsersByName(name);
     }
 
-    @PostMapping("/insert")
-    public ResponseEntity<User> insertUser(@RequestBody User user) {
+    @PostMapping
+    public ResponseEntity<User> createUser(@RequestBody User user) {
         User savedUser = userService.addUser(user);
-        return ResponseEntity.ok(savedUser);
+        URI location = URI.create(String.format("api/users/%d", savedUser.getId()));
+        return ResponseEntity.created(location).body(savedUser);
     }
 
     @DeleteMapping("/delete/{id}")

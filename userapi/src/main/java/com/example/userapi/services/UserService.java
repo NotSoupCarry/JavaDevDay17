@@ -27,9 +27,9 @@ public class UserService {
                 .toList();
     }
 
-    public User addUser(User user) {
-        users.add(user); 
-        return user; 
+    public User addUser(User newUser) {
+        users.add(newUser); 
+        return newUser; 
     }
 
     public void deleteUser(Long id) {
