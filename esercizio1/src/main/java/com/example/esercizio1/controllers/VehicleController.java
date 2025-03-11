@@ -12,6 +12,8 @@ import com.example.esercizio1.models.Vehicle;
 import com.example.esercizio1.models.enums.VehicleStatuses;
 import com.example.esercizio1.services.VehicleService;
 
+import jakarta.validation.Valid;
+
 @RestController
 @RequestMapping("/api/vehicles")
 public class VehicleController {
@@ -53,7 +55,7 @@ public class VehicleController {
 
     // inserire un nuovo veicolo
     @PostMapping
-    public ResponseEntity<Vehicle> aggiungiVeicolo(@RequestBody Vehicle veicolo) {
+    public ResponseEntity<Vehicle> aggiungiVeicolo(@Valid @RequestBody Vehicle veicolo) {
         Vehicle nuovoVeicolo = vehicleService.addVehicle(veicolo);
         URI location = URI.create(String.format("api/vehicles/%s", nuovoVeicolo.getTarga()));
         return ResponseEntity.created(location).body(nuovoVeicolo);

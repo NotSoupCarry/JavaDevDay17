@@ -4,12 +4,29 @@ import java.util.Date;
 
 import com.example.esercizio1.models.enums.VehicleStatuses;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
+
 public class Vehicle {
+    @NotNull(message = "L'id non può essere nullo")
     private int id;
+
+    @NotBlank(message = "La marca del veicolo non può essere vuota")
     private String marca;
+
+    @NotBlank(message = "il modello del veicolo non può essere vuoto")
     private String modello;
+
+    @NotBlank(message = "La targa non può essere vuota")
+    @Size(min = 5, max = 10, message = "La targa deve essere tra i 5 e i 10 caratteri")
+    @Pattern(regexp = "^[A-Za-z]{2}\\d{3}[A-Za-z]{2}$", message = "La targa deve seguire il formato: XX - 123 - XX")
     private String targa;
+
     private Date dataIngresso;
+
+    @NotNull(message = "Lo stato non può essere nullo")
     private VehicleStatuses stato;
 
     public Vehicle(int id, String marca, String modello, String targa, Date dataIngresso, VehicleStatuses stato) {

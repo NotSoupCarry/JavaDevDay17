@@ -67,7 +67,8 @@
                     vehicleList.innerHTML = "";
                     vehicles.forEach(vehicle => {
                         const listItem = document.createElement("li");
-                        listItem.textContent = `${vehicle.id} - ${vehicle.marca} ${vehicle.modello} - ${vehicle.targa} (${vehicle.stato})`;
+                        const formattedDate = new Date(vehicle.dataIngresso).toLocaleString();
+                        listItem.textContent = `${vehicle.id} - ${vehicle.marca} ${vehicle.modello} - ${vehicle.targa} (${vehicle.stato} - (${formattedDate})`;
                         vehicleList.appendChild(listItem);
                     });
                 })
@@ -178,8 +179,8 @@
                             document.getElementById("addResult").textContent = `Added: ${vehicle.marca} ${vehicle.modello} - ${vehicle.targa}`;
                             getAllVehicles(); // Refresh the list of vehicles
                         })
-                        .catch(() => document.getElementById("addResult").textContent = "Error adding vehicle");
-                })
+                        document.getElementById("addResult").textContent = error.message || "Error adding vehicle";
+                    })
                 .catch(() => document.getElementById("addResult").textContent = "Error fetching vehicles");
         }
 
