@@ -1,6 +1,7 @@
 package com.example.esercizio1.controllers;
 
 import java.net.URI;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -56,6 +57,8 @@ public class VehicleController {
     // inserire un nuovo veicolo
     @PostMapping
     public ResponseEntity<Vehicle> aggiungiVeicolo(@Valid @RequestBody Vehicle veicolo) {
+        veicolo.setDataIngresso(new Date());
+
         Vehicle nuovoVeicolo = vehicleService.addVehicle(veicolo);
         URI location = URI.create(String.format("api/vehicles/%s", nuovoVeicolo.getTarga()));
         return ResponseEntity.created(location).body(nuovoVeicolo);

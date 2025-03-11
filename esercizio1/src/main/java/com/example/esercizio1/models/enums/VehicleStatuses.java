@@ -2,7 +2,7 @@ package com.example.esercizio1.models.enums;
 
 public enum VehicleStatuses {   
     IN_ATTESA("In attesa"),
-    COMPLETATO("Compleatao"),
+    COMPLETATO("Compleatato"),
     IN_LAVORAZIONE("In lavorazione");
 
     private final String descrizione;

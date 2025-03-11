@@ -3,6 +3,7 @@ package com.example.esercizio1.models;
 import java.util.Date;
 
 import com.example.esercizio1.models.enums.VehicleStatuses;
+import com.fasterxml.jackson.annotation.JsonFormat;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -23,6 +24,8 @@ public class Vehicle {
     @Size(min = 5, max = 10, message = "La targa deve essere tra i 5 e i 10 caratteri")
     @Pattern(regexp = "^[A-Za-z]{2}\\d{3}[A-Za-z]{2}$", message = "La targa deve seguire il formato: XX - 123 - XX")
     private String targa;
+
+    @JsonFormat(pattern = "yyyy-MM-dd")
 
     private Date dataIngresso;
 
