@@ -1,39 +1,50 @@
 package com.example.userapi.services;
 
 import com.example.userapi.models.User;
+import com.example.userapi.repository.UserRepository;
+
+import jakarta.transaction.Transactional;
+
 import org.springframework.stereotype.Service;
 import java.util.List;
-import java.util.ArrayList;
-import java.util.Optional;
+
 
 @Service
 public class UserService {
-    private final List<User> users = new ArrayList<>(List.of(
-            new User(1L, "Mario Rossi", "mario.rossi@example.com"),
-            new User(2L, "Luca Bianchi", "luca.bianchi@example.com"),
-            new User(3L, "Giulia Verdi", "giulia.verdi@example.com")));
+    private final UserRepository userRepository;
 
-    public List<User> getAllUsers() {
-        return users;
+    public UserService(UserRepository userRepository) {
+        this.userRepository = userRepository;
     }
 
-    public Optional<User> getUserById(Long id) {
-        return users.stream().filter(user -> user.getId().equals(id)).findFirst();
+    public List<User> getAllUsers() {
+        // return users;
+        return userRepository.findAll();
+    }
+
+    public User getUserById(Long id) {
+        // return users.stream().filter(user -> user.getId().equals(id)).findFirst();
+        return userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Utente non trovato"));
     }
 
     public List<User> findUsersByName(String name) {
-        return users.stream()
-                .filter(user -> user.getName().toLowerCase().contains(name.toLowerCase()))
-                .toList();
+        // return users.stream()
+        // .filter(user -> user.getName().toLowerCase().contains(name.toLowerCase()))
+        // .toList();ù
+        return null;
     }
 
+    @Transactional
     public User addUser(User newUser) {
-        users.add(newUser); 
-        return newUser; 
+        // users.add(newUser);
+        // return newUser;
+        return userRepository.save(newUser);
     }
 
     public void deleteUser(Long id) {
-        users.removeIf(user -> user.getId().equals(id));
+        // users.removeIf(user -> user.getId().equals(id));
+        userRepository.deleteById(id);
     }
-    
+
 }

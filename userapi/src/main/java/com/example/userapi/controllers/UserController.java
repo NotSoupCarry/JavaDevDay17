@@ -8,7 +8,6 @@ import com.example.userapi.services.UserService;
 
 import java.net.URI;
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -34,15 +33,10 @@ public class UserController {
 
     @GetMapping("/{id}")
     public ResponseEntity<User> getUserById(@PathVariable Long id) {
-        Optional<User> user = userService.getUserById(id);
-        return user.map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        return ResponseEntity.ok(userService.getUserById(id));
     }
 
-    @GetMapping("/search")
-    public List<User> findUserByName(@RequestParam String name) {
-        return userService.findUsersByName(name);
-    }
+    
 
     @PostMapping
     public ResponseEntity<User> createUser(@RequestBody User user) {
@@ -51,15 +45,19 @@ public class UserController {
         return ResponseEntity.created(location).body(savedUser);
     }
 
+    @GetMapping("/search")
+    public List<User> findUserByName(@RequestParam String name) {
+        return userService.findUsersByName(name);
+    }
+    
     @DeleteMapping("/delete/{id}")
-    public ResponseEntity<User> deleteUser(@PathVariable Long id) {
-        Optional<User> user = userService.getUserById(id);
-
-        if (user.isPresent()) {
+    public ResponseEntity<String> deleteUser(@PathVariable Long id) {
+        try {
+            User user = userService.getUserById(id);
             userService.deleteUser(id);
-            return ResponseEntity.ok(user.get()); 
-        } else {
-            return ResponseEntity.notFound().build(); 
+            return ResponseEntity.ok("User '" + user.getName() + "' deleted successfully.");
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
         }
     }
 
